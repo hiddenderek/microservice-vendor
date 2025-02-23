@@ -1,0 +1,21 @@
+{
+    "compilerOptions": {
+        "module": "ESNext",
+        "target": "ESNext",
+        "moduleResolution": "node",
+        "outDir": "dist",
+        "noImplicitAny": false,
+        "esModuleInterop": true,
+        "emitDecoratorMetadata": true,
+        "experimentalDecorators": true,
+        "allowSyntheticDefaultImports": true,
+        "useDefineForClassFields": true,
+        "useUnknownInCatchVariables": false,
+        "resolveJsonModule": true,
+        "skipLibCheck": true,
+        "strict": true,
+        "sourceMap": true
+    },
+    "include": ["src/**/*.ts", "src/lib/sqlTag.ts", "src/lib/misc/sqlTemplateTag.ts"],
+    "exclude": ["node_modules", "dist"]
+}

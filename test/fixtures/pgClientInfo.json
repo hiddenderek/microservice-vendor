@@ -1,0 +1,9 @@
+{
+    "user": "postgres",
+    "password": "Secret1234",
+    "database": "backenddb",
+    "host": "localhost",
+    "port": 3307,
+    "max": 15000,
+    "keepAlive": true
+}

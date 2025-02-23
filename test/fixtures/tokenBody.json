@@ -1,0 +1,17 @@
+{
+    "sub": "mock-sub-id",
+    "cognito:groups": ["admin"],
+    "cognito:username": "portaladmin",
+    "iss": "https://mock-iss.com",
+    "aud": "test-aud",
+    "event_id": "mock-event-id",
+    "token_use": "id",
+    "auth_time": 1684965089,
+    "poolClientId": "mock-client-id",
+    "phone_number": "+1234567890",
+    "region": "us-west",
+    "exp": 9999999999,
+    "userPoolId": "us-west-mock-pool-id",
+    "iat": 1684965089,
+    "email": "mock-email@gmail.com"
+}

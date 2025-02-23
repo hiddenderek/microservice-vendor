@@ -1,0 +1,15 @@
+module.exports = {
+    printWidth: 100,
+    tabWidth: 4,
+    trailingComma: 'all',
+    singleQuote: true,
+    semi: true,
+    proseWrap: 'always',
+    arrowParens: 'always',
+    importOrder: ['<THIRD_PARTY_MODULES>', '<TYPES>', '<TYPES>^[./]', '^~/types/(.*)$', '^[./]'],
+    importOrderSeparation: false,
+    importOrderSortSpecifiers: true,
+    importOrderBuiltinModulesToTop: true,
+    importOrderParserPlugins: ['typescript', 'decorators-legacy'],
+    importOrderMergeDuplicateImports: true,
+};

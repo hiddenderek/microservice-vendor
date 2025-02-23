@@ -1,0 +1,11 @@
+version: '3.8'
+services:
+    postgres:
+        image: 'postgres:11'
+        ports:
+            - '3307:5432'
+        environment:
+            - POSTGRES_PASSWORD=Secret1234
+            - POSTGRES_DB=backenddb
+        volumes:
+            - ./test/database/setup.sql:/docker-entrypoint-initdb.d/01-bb.sql
