@@ -1,0 +1,105 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Description: Microservice-Vendor
+Resources:
+  InvokeServicePermission:
+    Type: 'AWS::Lambda::Permission'
+    Properties:
+      Action: 'lambda:InvokeFunction'
+      FunctionName:
+        Ref: ServiceLambda
+      Principal: apigateway.amazonaws.com
+  Api:
+    Type: 'AWS::Serverless::Api'
+    Properties:
+      StageName:
+        'Fn::FindInMap':
+          - BuildEnvs
+          - Ref: Environment
+          - StageName
+      Cors:
+        AllowHeaders: >-
+          'Origin,X-Requested-With,Content-Type,Accept,tenantid,authorization'
+      TracingEnabled: true
+      MethodSettings:
+        - ThrottlingRatelimit: 10000
+          ThrottlingBurstLimit: 5000
+          DataTraceEnabled: true
+          LoggingLevel: INFO
+          MetricsEnabled: false
+          HttpMethod: '*'
+          ResourcePath: /*
+      DefinitionBody:
+        'Fn::Transform':
+          Name: 'AWS::Include'
+          Parameters:
+            Location:
+              'Fn::Join':
+                - ''
+                - - 's3://'
+                  - Ref: AssetBucket
+                  - /
+                  - Ref: ServiceName
+                  - /
+                  - Ref: BuildId
+                  - /swagger.json
+  ApiMapping:
+    Type: 'AWS::ApiGateway::BasePathMapping'
+    Properties: -
+    DependsOn: ApiStage
+  ServiceLambda:
+    Type: 'AWS::Serverless::Function'
+    Properties:
+      Handler: dist/lambda.handler
+      Timeout: 900
+      MemorySize: 1024
+      Runtime: nodejs20.x
+      CodeUri: ''
+      Tracing: Active
+      LoggingConfig:
+        LogGroup: !Ref LogGroupService
+      Policies:
+        - AWSLambdaBasicExecutionRole
+        - AWSLambdaVPCAccessExecutionRole
+        - AWSSNSFullAccess
+        - SecretsManagerReadWrite
+        - Statement:
+            - Sid: MMSAccessPolicy
+              Effect: Allow
+              Action:
+                - 'kms:Encrypt'
+                - 'kms:Decrypt'
+                - 'kms:GenerateDataKey*'
+                - 'kms:DescribeKey'
+              Resource:
+                'Fn::Sub': 'arn:aws:kms:*:${AWS::AccountId}:key/*'
+      VpcConfig:
+        SubnetIds:
+          - 'Fn::ImportValue': TestGroupVPC-PrivateSubnet1Id
+      Environment:
+        Variables:
+          Region:
+            Ref: 'AWS::Region'
+          NODE_ENV:
+            Ref: Environment
+          KMS_KEY_ID: alias/dataSecurityKey
+          COGNITO_SECRET: cognito-admin
+          DB_SECRET: testcorpwriter-postgres
+          EVENT_GLOBAL_TOPIC:
+            'FN::Sub' >-
+              arn:aws:sns:{AWS::Region}:${AWS::AccountId}:${Environment}-testcorpglobal
+      Events:
+        QueryCPC:
+          Type: Api
+          Properties:
+            RestApiId:
+              Ref: Api
+            Path: /*
+            Method: any
+Outputs:
+  Api:
+    Decription: Api
+    Value:
+      Ref: Api
+    Export:
+      Name:
+        'Fn:Sub': '${ServiceName}-Api'

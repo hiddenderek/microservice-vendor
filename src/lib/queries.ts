@@ -1,17 +1,18 @@
 import { QueryConfig } from 'pg';
 import { getConnection } from './getConnection';
 import { fields, fieldsAsCamel, fieldsEqualValues, keysToCamel, values } from './fieldOperations';
-import { concatSql, rawText, sql } from './sqlTag';
+import { concatSql, rawText } from './sqlTag';
 import { InternalServerErrorException } from '@nestjs/common';
 
 export const executeQuery = async <T>(db: string, query: QueryConfig): Promise<T[]> => {
-    const { pool, poolClient } = await getConnection(db);
+    const { pool } = await getConnection(db);
     try {
-        const result = (await poolClient.query<T[]>(query)) ?? [];
-        pool.end();
-        return result.rows.map((r) => keysToCamel(r));
+        const result = await pool.query<T[]>(query);
+
+        const queryResult = result.rows.map((r) => keysToCamel(r));
+
+        return queryResult;
     } catch (e) {
-        pool.end();
         throw new InternalServerErrorException(e, 'Database Error');
     }
 };
@@ -29,7 +30,10 @@ export const selectQuery = async <T>(
         ),
         query,
     );
-    return (await executeQuery(db, selectQuery)) ?? [];
+
+    const result = await executeQuery<T>(db, selectQuery);
+
+    return result ?? [];
 };
 
 export const selectOneQuery = async <T>(
@@ -44,10 +48,13 @@ export const selectOneQuery = async <T>(
         ),
         query,
     );
+
     const result = await executeQuery<T>(db, selectQuery);
+
     if (result.length === 1) {
         return result[0];
     }
+
     return null;
 };
 
@@ -56,8 +63,9 @@ export const insertQuery = async <T>(
     tableName: string,
     returnParams?: (keyof T)[],
     ...o: T[]
-): Promise<T | null> => {
+): Promise<T> => {
     const fieldsString = fields(o[0] as Record<string, any>);
+
     const insertQuery = concatSql(
         rawText(`INSERT INTO ${tableName} (${fieldsString}) VALUES`),
         ...o.map((obj, i, arr) =>
@@ -69,11 +77,10 @@ export const insertQuery = async <T>(
         ),
         rawText(`RETURNING ${returnParams?.length ? fieldsAsCamel(returnParams) : '*'}`),
     );
+
     const result = await executeQuery<T>(db, insertQuery);
-    if (result.length === 1) {
-        return result[0];
-    }
-    return null;
+
+    return result[0];
 };
 
 export const updateQuery = async <T>(
@@ -89,10 +96,13 @@ export const updateQuery = async <T>(
         query,
         rawText(`RETURNING ${returnParams?.length ? fieldsAsCamel(returnParams) : '*'}`),
     );
+
     const result = await executeQuery<T>(db, insertQuery);
+
     if (result.length === 1) {
         return result[0];
     }
+
     return null;
 };
 
@@ -104,8 +114,9 @@ export const upsertQuery = async <T>(
     o2: Partial<T>,
     query?: QueryConfig,
     returnParams?: (keyof T)[],
-): Promise<T | null> => {
+): Promise<T> => {
     const fieldsString = fields(o1 as Record<string, any>);
+
     const insertQuery = concatSql(
         rawText(`INSERT INTO ${tableName} (${fieldsString}) VALUES`),
         rawText(`(`),
@@ -116,11 +127,10 @@ export const upsertQuery = async <T>(
         query,
         rawText(`RETURNING ${returnParams?.length ? fieldsAsCamel(returnParams) : '*'}`),
     );
+
     const result = await executeQuery<T>(db, insertQuery);
-    if (result.length === 1) {
-        return result[0];
-    }
-    return null;
+
+    return result[0];
 };
 
 export const deleteQuery = async <T>(
@@ -130,13 +140,10 @@ export const deleteQuery = async <T>(
     returnParams?: (keyof T)[],
 ): Promise<T[]> => {
     const deleteQuery = concatSql(
-        rawText(
-            `DELETE FROM ${tableName}`,
-        ),
+        rawText(`DELETE FROM ${tableName}`),
         query,
-        rawText(
-            `RETURNING ${returnParams?.length ? fieldsAsCamel(returnParams) : '*'}`
-        )
+        rawText(`RETURNING ${returnParams?.length ? fieldsAsCamel(returnParams) : '*'}`),
     );
+
     return (await executeQuery(db, deleteQuery)) ?? [];
 };

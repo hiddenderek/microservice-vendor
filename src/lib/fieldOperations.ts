@@ -5,7 +5,20 @@ const isArray = function (a) {
 };
 
 const isObject = function (o) {
-    return o === Object(o) && !isArray(o) && typeof o !== 'function';
+    return (
+        o === Object(o) &&
+        !isArray(o) &&
+        typeof o !== 'function' &&
+        !(o instanceof Date) &&
+        !(o instanceof RegExp) &&
+        !(o instanceof Map) &&
+        !(o instanceof Set) &&
+        !(o instanceof WeakMap) &&
+        !(o instanceof WeakSet) &&
+        !(o instanceof Error) &&
+        !(typeof Buffer !== 'undefined' && Buffer.isBuffer(o)) &&
+        !(o instanceof Promise)
+    );
 };
 
 const toCamel = (s) => {
@@ -23,6 +36,12 @@ export const keysToCamel = function (o) {
         const n = {};
 
         Object.keys(o).forEach((k) => {
+            if (typeof o[k] === 'string' && !isNaN(Number(o[k])) && o[k].trim() !== '') {
+                n[toCamel(k)] = Number(o[k]);
+
+                return;
+            }
+
             n[toCamel(k)] = keysToCamel(o[k]);
         });
 
@@ -44,7 +63,8 @@ export const fields = function (o: Record<string, any>) {
 
 export const values = function (o: Record<string, any>) {
     const fieldMap = new Map(Object.keys(o).map((k) => [k, toSnake(k)]));
-    const vals = Array.from(fieldMap.keys()).map((k) => sql`${o[k]}`);
+    const vals = Array.from(fieldMap.keys()).map((k) => sql`${o[k]}`
+    );
     return joinSql(vals, ', ');
 };
 

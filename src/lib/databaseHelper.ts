@@ -22,45 +22,53 @@ export class DatabaseHelper<T = Record<string, any>> {
     async select<A = T>({
         query,
         selectParams,
+        tableName = this?.tableName,
     }: {
         query?: QueryConfig;
         selectParams?: (keyof A)[];
+        tableName?: string;
     }) {
-        return await selectQuery<A>(this.database, this?.tableName ?? '', query, selectParams);
+        return await selectQuery<A>(this.database, tableName ?? '', query, selectParams);
     }
 
     async selectOne<A = T>({
         query,
         selectParams,
+        tableName = this?.tableName,
     }: {
         query: QueryConfig;
         selectParams?: (keyof A)[];
+        tableName?: string;
     }) {
-        return await selectOneQuery<A>(this.database, this?.tableName ?? '', query, selectParams);
+        return await selectOneQuery<A>(this.database, tableName ?? '', query, selectParams);
     }
 
     async insert<A = T>({
         postObject,
         returnParams,
+        tableName = this?.tableName,
     }: {
         postObject: A;
         returnParams?: (keyof A)[];
+        tableName?: string;
     }) {
-        return await insertQuery<A>(this.database, this?.tableName ?? '', returnParams, postObject);
+        return await insertQuery<A>(this.database, tableName ?? '', returnParams, postObject);
     }
 
     async update<A = T>({
         updateObject,
         query,
         returnParams,
+        tableName = this?.tableName,
     }: {
         updateObject: A;
         query: QueryConfig;
         returnParams?: (keyof A)[];
+        tableName?: string;
     }) {
         return await updateQuery<A>(
             this.database,
-            this?.tableName ?? '',
+            tableName ?? '',
             query,
             updateObject,
             returnParams,
@@ -73,19 +81,21 @@ export class DatabaseHelper<T = Record<string, any>> {
         query,
         conflictColumn,
         returnParams,
+        tableName = this?.tableName,
     }: {
         postObject: A;
-        updateObject: Partial<A>;
+        updateObject?: Partial<A>;
         query?: QueryConfig;
         conflictColumn: string;
         returnParams?: (keyof A)[];
+        tableName?: string;
     }) {
         return await upsertQuery<A>(
             this.database,
-            this?.tableName ?? '',
+            tableName ?? '',
             conflictColumn,
             postObject,
-            updateObject,
+            updateObject ?? postObject,
             query,
             returnParams,
         );

@@ -16,6 +16,11 @@
         "strict": true,
         "sourceMap": true
     },
-    "include": ["src/**/*.ts", "src/lib/sqlTag.ts", "src/lib/misc/sqlTemplateTag.ts"],
+    "include": [
+        "src/**/*.ts",
+        "src/lib/sqlTag.ts",
+        "src/lib/misc/sqlTemplateTag.ts",
+        "test/unit/effect/effect.service.test.ts"
+    ],
     "exclude": ["node_modules", "dist"]
 }

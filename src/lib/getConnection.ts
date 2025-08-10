@@ -1,5 +1,4 @@
-import debug from 'debug';
-import { Pool, PoolConfig } from 'pg';
+import { Pool, PoolConfig, types } from 'pg';
 
 export async function getConnection(database: string) {
     const host = process.env.DB_HOST;
@@ -16,6 +15,9 @@ export async function getConnection(database: string) {
         port: port ? parseInt(port, 10) : 1337,
         idleTimeoutMillis: parseInt(process.env.DB_POOL_IDLE_TIMEOUT ?? '300', 10),
     };
+    const TIMESTAMP_OID = 1114;
+
+    types.setTypeParser(TIMESTAMP_OID, (str) => new Date(str));
 
     const pool = new Pool(config);
     const poolClient = await pool.connect();
