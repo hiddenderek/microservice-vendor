@@ -1,5 +1,5 @@
 import { Controller, Post, Get, Body, Param } from '@nestjs/common';
-import { EffectCreateRequestDTO, EffectCreateResponseDTO } from './effect.dto';
+import type { EffectCreateRequestDTO, EffectCreateResponseDTO } from './effect.dto';
 import { EffectService } from './effect.service';
 import { ApiTags } from '@nestjs/swagger';
 

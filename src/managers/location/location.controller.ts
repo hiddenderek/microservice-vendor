@@ -1,6 +1,6 @@
 import { Controller, Post, Body } from '@nestjs/common';
 import { LocationService } from './location.service';
-import {
+import type {
     LocationCombinationCreateRequestDTO,
     LocationCombinationResponseDTO,
     LocationCreateRequestDTO,

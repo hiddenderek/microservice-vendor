@@ -1,7 +1,7 @@
 import { Controller, Post, Get, Body, Param } from '@nestjs/common';
 import { ApiOperation, ApiResponse, ApiTags, ApiBearerAuth } from '@nestjs/swagger';
 import { PromotionService } from './promotion.service';
-import { CreatePromotionRequestDTO } from './promotion.dto';
+import type { CreatePromotionRequestDTO } from './promotion.dto';
 
 @Controller('promotion')
 @ApiTags('promotion')

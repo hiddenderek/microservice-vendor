@@ -1,28 +1,49 @@
 AWSTemplateFormatVersion: '2010-09-09'
+Transform: AWS::Serverless-2016-10-31
 Description: Microservice-Vendor
+
+Parameters:
+  Environment:
+    Type: String
+    Description: Deployment environment (dev, qa, prod)
+  ServiceName:
+    Type: String
+    Description: Name of the service
+  AssetBucket:
+    Type: String
+    Description: S3 bucket for deployment artifacts
+  CommitId:
+    Type: String
+    Description: Git commit SHA for this deployment
+
+Conditions:
+  IsProd: !Equals [!Ref Environment, 'prod']
+
 Resources:
+  LogGroupService:
+    Type: AWS::Logs::LogGroup
+    Properties:
+      LogGroupName: !Sub "/aws/lambda/${ServiceName}-${Environment}"
   InvokeServicePermission:
     Type: 'AWS::Lambda::Permission'
     Properties:
       Action: 'lambda:InvokeFunction'
-      FunctionName:
-        Ref: ServiceLambda
+      FunctionName: !Ref ServiceLambda
       Principal: apigateway.amazonaws.com
   Api:
     Type: 'AWS::Serverless::Api'
     Properties:
-      StageName:
-        'Fn::FindInMap':
-          - BuildEnvs
-          - Ref: Environment
-          - StageName
+      StageName: !Ref Environment
+      ApiKeySourceType: HEADER
+      Auth:
+        ApiKeyRequired: true
       Cors:
         AllowHeaders: >-
-          'Origin,X-Requested-With,Content-Type,Accept,tenantid,authorization'
-      TracingEnabled: true
+          'Origin,X-Requested-With,Content-Type,Accept,tenantid,authorization,x-api-key'
+      TracingEnabled: !If [IsProd, true, false]
       MethodSettings:
-        - ThrottlingRatelimit: 10000
-          ThrottlingBurstLimit: 5000
+        - ThrottlingRatelimit: 3
+          ThrottlingBurstLimit: 2
           DataTraceEnabled: true
           LoggingLevel: INFO
           MetricsEnabled: false
@@ -32,34 +53,27 @@ Resources:
         'Fn::Transform':
           Name: 'AWS::Include'
           Parameters:
-            Location:
-              'Fn::Join':
-                - ''
-                - - 's3://'
-                  - Ref: AssetBucket
-                  - /
-                  - Ref: ServiceName
-                  - /
-                  - Ref: BuildId
-                  - /swagger.json
-  ApiMapping:
-    Type: 'AWS::ApiGateway::BasePathMapping'
-    Properties: -
-    DependsOn: ApiStage
+            Location: !Sub 's3://${AssetBucket}/${ServiceName}/${CommitId}/swagger.json'
+  # ApiMapping is for custom domains - remove if not using custom domain
+  # ApiMapping:
+  #   Type: 'AWS::ApiGateway::BasePathMapping'
+  #   Properties:
+  #     DomainName: your-custom-domain.com  # Set your custom domain here
+  #     RestApiId: !Ref Api
+  #     Stage: !Ref Environment
   ServiceLambda:
     Type: 'AWS::Serverless::Function'
     Properties:
       Handler: dist/lambda.handler
-      Timeout: 900
-      MemorySize: 1024
+      Timeout: 200
+      MemorySize: 256
       Runtime: nodejs20.x
-      CodeUri: ''
-      Tracing: Active
+      CodeUri: dist/
+      Tracing: !If [IsProd, Active, PassThrough]
       LoggingConfig:
         LogGroup: !Ref LogGroupService
       Policies:
         - AWSLambdaBasicExecutionRole
-        - AWSLambdaVPCAccessExecutionRole
         - AWSSNSFullAccess
         - SecretsManagerReadWrite
         - Statement:
@@ -70,36 +84,115 @@ Resources:
                 - 'kms:Decrypt'
                 - 'kms:GenerateDataKey*'
                 - 'kms:DescribeKey'
-              Resource:
-                'Fn::Sub': 'arn:aws:kms:*:${AWS::AccountId}:key/*'
-      VpcConfig:
-        SubnetIds:
-          - 'Fn::ImportValue': TestGroupVPC-PrivateSubnet1Id
+              Resource: !Sub 'arn:aws:kms:${AWS::Region}:${AWS::AccountId}:key/*'
+            - Sid: DatabaseSecretsAccess
+              Effect: Allow
+              Action:
+                - 'secretsmanager:GetSecretValue'
+                - 'secretsmanager:DescribeSecret'
+              Resource: 
+                - !Sub 'arn:aws:secretsmanager:${AWS::Region}:${AWS::AccountId}:secret:testcorpdeploy-postgres*'
+                - !Sub 'arn:aws:secretsmanager:${AWS::Region}:${AWS::AccountId}:secret:${Environment}-cognito-pool*'
+      # VpcConfig removed - Lambda runs in AWS-managed VPC (no cost)
       Environment:
         Variables:
-          Region:
-            Ref: 'AWS::Region'
-          NODE_ENV:
-            Ref: Environment
+          Region: !Ref 'AWS::Region'
+          NODE_ENV: !Ref Environment
           KMS_KEY_ID: alias/dataSecurityKey
-          COGNITO_SECRET: cognito-admin
-          DB_SECRET: testcorpwriter-postgres
-          EVENT_GLOBAL_TOPIC:
-            'FN::Sub' >-
-              arn:aws:sns:{AWS::Region}:${AWS::AccountId}:${Environment}-testcorpglobal
+          # Database secret name - environment-specific for runtime access
+          DB_SECRET: !Sub 'testcorpdeploy-postgres'
+          # Cognito configuration - tyfpically stored as pool credentials
+          COGNITO_SECRET: !Sub '${Environment}-cognito-pool'
+          # Global event topic for microservice communication
+          EVENT_GLOBAL_TOPIC: !Ref GlobalEventTopic
       Events:
         QueryCPC:
           Type: Api
           Properties:
-            RestApiId:
-              Ref: Api
+            RestApiId: !Ref Api
             Path: /*
             Method: any
+
+  # API Key for basic authentication (free)
+  ApiKey:
+    Type: AWS::ApiGateway::ApiKey
+    Properties:
+      Name: !Sub '${ServiceName}-${Environment}-key'
+      Description: !Sub 'API Key for ${ServiceName} ${Environment}'
+      Enabled: true
+
+  # Usage plan to associate API key with API
+  UsagePlan:
+    Type: AWS::ApiGateway::UsagePlan
+    Properties:
+      UsagePlanName: !Sub '${ServiceName}-${Environment}-usage-plan'
+      Description: !Sub 'Usage plan for ${ServiceName} ${Environment}'
+      Throttle:
+        BurstLimit: 2
+        RateLimit: 3
+      ApiStages:
+        - ApiId: !Ref Api
+          Stage: !Ref Environment
+
+  # Link API key to usage plan
+  UsagePlanKey:
+    Type: AWS::ApiGateway::UsagePlanKey
+    Properties:
+      KeyId: !Ref ApiKey
+      KeyType: API_KEY
+      UsagePlanId: !Ref UsagePlan
+
+  # Global event topic for microservice communication
+  GlobalEventTopic:
+    Type: AWS::SNS::Topic
+    Properties:
+      TopicName: !Sub '${Environment}-testcorpglobal'
+      DisplayName: !Sub 'Global Event Topic for ${Environment}'
+
+  # Resource policy to restrict access to the global topic
+  GlobalEventTopicPolicy:
+    Type: AWS::SNS::TopicPolicy
+    Properties:
+      Topics:
+        - !Ref GlobalEventTopic
+      PolicyDocument:
+        Statement:
+          - Effect: Allow
+            Principal:
+              AWS: !Sub '${AWS::AccountId}'
+            Action:
+              - 'SNS:Publish'
+              - 'SNS:Subscribe'
+            Resource: !Ref GlobalEventTopic
+          - Effect: Deny
+            Principal: '*'
+            Action: '*'
+            Resource: !Ref GlobalEventTopic
+            Condition:
+              StringNotEquals:
+                'aws:PrincipalAccount': !Ref 'AWS::AccountId'
+
 Outputs:
   Api:
-    Decription: Api
-    Value:
-      Ref: Api
+    Description: Api Gateway REST API
+    Value: !Ref Api
     Export:
-      Name:
-        'Fn:Sub': '${ServiceName}-Api'
+      Name: !Sub '${ServiceName}-Api'
+      
+  ApiUrl:
+    Description: API Gateway endpoint URL
+    Value: !Sub 'https://${Api}.execute-api.${AWS::Region}.amazonaws.com/${Environment}'
+    Export:
+      Name: !Sub '${ServiceName}-ApiUrl'
+      
+  ApiKey:
+    Description: API Key for authentication
+    Value: !Ref ApiKey
+    Export:
+      Name: !Sub '${ServiceName}-ApiKey'
+      
+  GlobalEventTopicArn:
+    Description: Global Event Topic ARN for microservice communication
+    Value: !Ref GlobalEventTopic
+    Export:
+      Name: !Sub '${Environment}-GlobalEventTopic-Arn'

@@ -1,0 +1,5 @@
+{
+  "ServiceName": "vendor",
+  "DatabaseName": "vendor-db",
+  "DeploymentType": "microservice"
+}

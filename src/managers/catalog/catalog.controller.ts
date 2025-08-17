@@ -1,7 +1,7 @@
 // ...existing code...
 import { Get, Controller, Post, Body, Param } from '@nestjs/common';
 import { CatalogService } from './catalog.service';
-import { CreateCatalogRequestDTO, CatalogResponseDTO } from './catalog.dto';
+import type { CreateCatalogRequestDTO, CatalogResponseDTO } from './catalog.dto';
 import { ApiBearerAuth, ApiResponse, ApiOperation, ApiTags } from '@nestjs/swagger';
 
 @ApiBearerAuth()

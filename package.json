@@ -12,6 +12,7 @@
         "test": "jest --runInBand -c jest.config.js",
         "test:integration:prep": "docker-compose down && docker-compose up",
         "test:integration": "NODE_ENV=migrate DB_USERID=postgres DB_PASSWORD=Secret1234 DB_PORT=3307 DB_NAME=vendor db-migrate up && PGPASSWORD=Secret1234 psql -h localhost -p 3307 -U postgres -d vendor -f test/database/setup.sql && NODE_ENV=development jest --runInBand -c jest.config.integration.js --detectOpenHandles",
+        "gen:swagger": "tsup scripts/generate-swagger.ts --onSuccess 'node dist/generate-swagger.js'",
         "start": "node dist/index.js"
     },
     "author": "",

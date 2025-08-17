@@ -1,6 +1,6 @@
 import { Get, Controller, InternalServerErrorException, Post, Body, Param } from '@nestjs/common';
 import { VendorService } from './vendor.service';
-import { VendorRequestDTO, VendorResponseDTO } from './vendor.dto';
+import type { VendorRequestDTO, VendorResponseDTO } from './vendor.dto';
 import { ApiBearerAuth, ApiResponse, ApiOperation, ApiTags } from '@nestjs/swagger';
 import { VendorEntity } from './vendor.entity';
 

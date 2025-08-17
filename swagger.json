@@ -1,0 +1,602 @@
+{
+  "openapi": "3.0.0",
+  "paths": {
+    "/api": {
+      "get": {
+        "operationId": "AppController_root",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        }
+      }
+    },
+    "/api/vendor": {
+      "post": {
+        "operationId": "VendorController_createVendor",
+        "summary": "Creates a vendor",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Returns created vendor data"
+          }
+        },
+        "tags": [
+          "vendor"
+        ],
+        "security": [
+          {
+            "bearer": []
+          }
+        ]
+      }
+    },
+    "/api/vendor/{vendorId}": {
+      "get": {
+        "operationId": "VendorController_getVendor",
+        "summary": "Gets vendor by vendor id",
+        "parameters": [
+          {
+            "name": "vendorId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Returns vendor data"
+          }
+        },
+        "tags": [
+          "vendor"
+        ],
+        "security": [
+          {
+            "bearer": []
+          }
+        ]
+      }
+    },
+    "/api/vendor/{vendorId}/metrics": {
+      "get": {
+        "operationId": "VendorController_getVendorMetrics",
+        "summary": "Gets vendor metrics",
+        "parameters": [
+          {
+            "name": "vendorId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Returns vendor data"
+          }
+        },
+        "tags": [
+          "vendor"
+        ],
+        "security": [
+          {
+            "bearer": []
+          }
+        ]
+      }
+    },
+    "/api/location": {
+      "post": {
+        "operationId": "LocationController_createLocation",
+        "summary": "Create a new location",
+        "parameters": [],
+        "responses": {
+          "201": {
+            "description": "Location created"
+          }
+        },
+        "tags": [
+          "location"
+        ]
+      }
+    },
+    "/api/location/combination": {
+      "post": {
+        "operationId": "LocationController_createLocationCombination",
+        "summary": "Create a new location combination",
+        "parameters": [],
+        "responses": {
+          "201": {
+            "description": "Location combination created"
+          }
+        },
+        "tags": [
+          "location"
+        ]
+      }
+    },
+    "/api/catalog": {
+      "post": {
+        "operationId": "CatalogController_createCatalog",
+        "summary": "Creates a catalog",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Returns created catalog data"
+          }
+        },
+        "tags": [
+          "catalog"
+        ],
+        "security": [
+          {
+            "bearer": []
+          }
+        ]
+      }
+    },
+    "/api/catalog/{catalogId}": {
+      "get": {
+        "operationId": "CatalogController_getCatalogById",
+        "summary": "Gets catalog by catalog id",
+        "parameters": [
+          {
+            "name": "catalogId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Returns catalog data"
+          }
+        },
+        "tags": [
+          "catalog"
+        ],
+        "security": [
+          {
+            "bearer": []
+          }
+        ]
+      }
+    },
+    "/api/catalog/location/{locationId}": {
+      "get": {
+        "operationId": "CatalogController_getCatalogByLocation",
+        "summary": "Gets catalog by location id",
+        "parameters": [
+          {
+            "name": "locationId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Returns catalog data"
+          }
+        },
+        "tags": [
+          "catalog"
+        ],
+        "security": [
+          {
+            "bearer": []
+          }
+        ]
+      }
+    },
+    "/api/effect": {
+      "post": {
+        "operationId": "EffectController_createEffect",
+        "parameters": [],
+        "responses": {
+          "201": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "effect"
+        ]
+      }
+    },
+    "/api/effect/condition": {
+      "post": {
+        "operationId": "EffectController_createConditionalEffect",
+        "parameters": [],
+        "responses": {
+          "201": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "effect"
+        ]
+      }
+    },
+    "/api/effect/{effectId}": {
+      "get": {
+        "operationId": "EffectController_getEffect",
+        "parameters": [
+          {
+            "name": "effectId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "effect"
+        ]
+      }
+    },
+    "/api/promotion": {
+      "post": {
+        "operationId": "PromotionController_createPromotion",
+        "summary": "Create a promotion with an effect",
+        "parameters": [],
+        "responses": {
+          "201": {
+            "description": "Promotion with effect created successfully"
+          }
+        },
+        "tags": [
+          "promotion"
+        ],
+        "security": [
+          {
+            "bearer": []
+          }
+        ]
+      }
+    },
+    "/api/promotion/{vendorId}": {
+      "get": {
+        "operationId": "PromotionController_getPromotions",
+        "summary": "Get promotions by vendor ID",
+        "parameters": [
+          {
+            "name": "vendorId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Promotions retrieved successfully"
+          }
+        },
+        "tags": [
+          "promotion"
+        ],
+        "security": [
+          {
+            "bearer": []
+          }
+        ]
+      }
+    },
+    "/api/promotion/active/{vendorId}": {
+      "get": {
+        "operationId": "PromotionController_getActivePromotions",
+        "summary": "Get active promotions by vendor ID with effect details",
+        "parameters": [
+          {
+            "name": "vendorId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Active promotions retrieved successfully"
+          }
+        },
+        "tags": [
+          "promotion"
+        ],
+        "security": [
+          {
+            "bearer": []
+          }
+        ]
+      }
+    },
+    "/api/promotion/detail/{promotionId}": {
+      "get": {
+        "operationId": "PromotionController_getPromotion",
+        "summary": "Get promotion by ID",
+        "parameters": [
+          {
+            "name": "promotionId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Promotion retrieved successfully"
+          }
+        },
+        "tags": [
+          "promotion"
+        ],
+        "security": [
+          {
+            "bearer": []
+          }
+        ]
+      }
+    },
+    "/api/subscription": {
+      "post": {
+        "operationId": "SubscriptionController_createSubscription",
+        "summary": "Create a new subscription",
+        "parameters": [],
+        "responses": {
+          "201": {
+            "description": "Subscription created successfully"
+          }
+        },
+        "tags": [
+          "subscription"
+        ],
+        "security": [
+          {
+            "bearer": []
+          }
+        ]
+      }
+    },
+    "/api/subscription/{subscriptionId}": {
+      "get": {
+        "operationId": "SubscriptionController_getSubscription",
+        "summary": "Get subscription by ID",
+        "parameters": [
+          {
+            "name": "subscriptionId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Subscription retrieved successfully"
+          }
+        },
+        "tags": [
+          "subscription"
+        ],
+        "security": [
+          {
+            "bearer": []
+          }
+        ]
+      }
+    },
+    "/api/subscription/customer/{customerId}": {
+      "get": {
+        "operationId": "SubscriptionController_getSubscriptionsByCustomer",
+        "summary": "Get subscriptions by customer ID",
+        "parameters": [
+          {
+            "name": "customerId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Customer subscriptions retrieved successfully"
+          }
+        },
+        "tags": [
+          "subscription"
+        ],
+        "security": [
+          {
+            "bearer": []
+          }
+        ]
+      }
+    },
+    "/api/subscription/vendor/{vendorId}": {
+      "get": {
+        "operationId": "SubscriptionController_getSubscriptionsByVendor",
+        "summary": "Get subscriptions by vendor ID",
+        "parameters": [
+          {
+            "name": "vendorId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Vendor subscriptions retrieved successfully"
+          }
+        },
+        "tags": [
+          "subscription"
+        ],
+        "security": [
+          {
+            "bearer": []
+          }
+        ]
+      }
+    },
+    "/api/subscription/active/{vendorId}": {
+      "get": {
+        "operationId": "SubscriptionController_getActiveSubscriptions",
+        "summary": "Get active subscriptions by vendor ID with effect details",
+        "parameters": [
+          {
+            "name": "vendorId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Active subscriptions retrieved successfully"
+          }
+        },
+        "tags": [
+          "subscription"
+        ],
+        "security": [
+          {
+            "bearer": []
+          }
+        ]
+      }
+    },
+    "/api/subscription/{subscriptionId}/status": {
+      "put": {
+        "operationId": "SubscriptionController_updateSubscriptionStatus",
+        "summary": "Update subscription status",
+        "parameters": [
+          {
+            "name": "subscriptionId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Subscription status updated successfully"
+          }
+        },
+        "tags": [
+          "subscription"
+        ],
+        "security": [
+          {
+            "bearer": []
+          }
+        ]
+      }
+    },
+    "/api/subscription/{subscriptionId}/renew": {
+      "post": {
+        "operationId": "SubscriptionController_renewSubscription",
+        "summary": "Renew subscription and update next billing date",
+        "parameters": [
+          {
+            "name": "subscriptionId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Subscription renewed successfully"
+          }
+        },
+        "tags": [
+          "subscription"
+        ],
+        "security": [
+          {
+            "bearer": []
+          }
+        ]
+      }
+    },
+    "/api/subscription/billing/due": {
+      "get": {
+        "operationId": "SubscriptionController_getSubscriptionsDueForBilling",
+        "summary": "Get subscriptions due for billing",
+        "parameters": [
+          {
+            "name": "dueDate",
+            "required": false,
+            "in": "query",
+            "description": "Date to check for due subscriptions (ISO string)",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Due subscriptions retrieved successfully"
+          }
+        },
+        "tags": [
+          "subscription"
+        ],
+        "security": [
+          {
+            "bearer": []
+          }
+        ]
+      }
+    }
+  },
+  "info": {
+    "title": "NestJS Realworld Example App",
+    "description": "The Realworld API description",
+    "version": "1.0",
+    "contact": {}
+  },
+  "tags": [],
+  "servers": [],
+  "components": {
+    "securitySchemes": {
+      "bearer": {
+        "scheme": "bearer",
+        "bearerFormat": "JWT",
+        "type": "http"
+      }
+    },
+    "schemas": {}
+  }
+}

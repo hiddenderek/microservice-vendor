@@ -1,15 +1,45 @@
-name: Trigger-Build-Deploy
+name: Deploy Service
 on:
-    push:
-        branches:
-            - devdeploy
-            - master
-    workflow_dispatch:
+  push:
+    branches: [main, develop]
+  pull_request:
+    branches: [main]
 
 jobs:
-    call-build:
-        uses: hiddenderek/wkfl-microservice-build/.github/workflows/build.yml@v1.6.2
-        with:
-            region: us-west-2
-        secrets:
-            AWS_CREDS: ${{ toJSON(github.event.deployment.payload.aws) }}
+  deploy-dev:
+    if: github.ref == 'refs/heads/develop'
+    uses: hiddenderek/wkfl-microservice-build/.github/workflows/build.yml@main
+    with:
+      environment: dev
+      region: us-east-1
+      build-branch: develop
+    # Option 1: Organization secrets (if you have GitHub organization)
+    # No secrets needed! All managed at organization level
+    
+    # Option 2: Repository secrets (if no organization)
+    secrets:
+      aws-key: ${{ secrets.AWSKEY }}
+      aws-secret: ${{ secrets.AWSSECRET }}
+      aws-dev-account: ${{ secrets.AWS_DEV_ACCOUNT }}
+      aws-qa-account: ${{ secrets.AWS_QA_ACCOUNT }}
+      aws-prod-account: ${{ secrets.AWS_PROD_ACCOUNT }}
+      stop-bastion-after-deploy: ${{ secrets.STOP_BASTION_AFTER_DEPLOY }}
+
+  deploy-prod:
+    if: github.ref == 'refs/heads/main'
+    uses: hiddenderek/wkfl-microservice-build/.github/workflows/build.yml@main
+    with:
+      environment: dev
+      region: us-east-1
+      build-branch: main
+    # Option 1: Organization secrets (if you have GitHub organization)
+    # No secrets needed! All managed at organization level
+    
+    # Option 2: Repository secrets (if no organization)
+    secrets:
+      aws-key: ${{ secrets.AWSKEY }}
+      aws-secret: ${{ secrets.AWSSECRET }}
+      aws-dev-account: ${{ secrets.AWS_DEV_ACCOUNT }}
+      aws-qa-account: ${{ secrets.AWS_QA_ACCOUNT }}
+      aws-prod-account: ${{ secrets.AWS_PROD_ACCOUNT }}
+      stop-bastion-after-deploy: ${{ secrets.STOP_BASTION_AFTER_DEPLOY }}
