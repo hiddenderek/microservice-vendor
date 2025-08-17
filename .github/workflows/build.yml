@@ -15,7 +15,7 @@ jobs:
       build-branch: develop
     secrets:
       # GitHub token for accessing private repo
-      github-token: ${{ secrets.GITHUB_TOKEN }}
+      github-token: ${{ secrets.REPO_TOKEN }}
       # AWS secrets
       aws-key: ${{ secrets.AWSKEY }}
       aws-secret: ${{ secrets.AWSSECRET }}
@@ -33,7 +33,7 @@ jobs:
       build-branch: main
     secrets:
       # GitHub token for accessing private repo
-      github-token: ${{ secrets.GITHUB_TOKEN }}
+      github-token: ${{ secrets.REPO_TOKEN }}
       # AWS secrets
       aws-key: ${{ secrets.AWSKEY }}
       aws-secret: ${{ secrets.AWSSECRET }}
