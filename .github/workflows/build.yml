@@ -13,11 +13,10 @@ jobs:
       environment: dev
       region: us-east-1
       build-branch: develop
-    # Option 1: Organization secrets (if you have GitHub organization)
-    # No secrets needed! All managed at organization level
-    
-    # Option 2: Repository secrets (if no organization)
     secrets:
+      # GitHub token for accessing private repo
+      github-token: ${{ secrets.GITHUB_TOKEN }}
+      # AWS secrets
       aws-key: ${{ secrets.AWSKEY }}
       aws-secret: ${{ secrets.AWSSECRET }}
       aws-dev-account: ${{ secrets.AWS_DEV_ACCOUNT }}
@@ -32,11 +31,10 @@ jobs:
       environment: dev
       region: us-east-1
       build-branch: main
-    # Option 1: Organization secrets (if you have GitHub organization)
-    # No secrets needed! All managed at organization level
-    
-    # Option 2: Repository secrets (if no organization)
     secrets:
+      # GitHub token for accessing private repo
+      github-token: ${{ secrets.GITHUB_TOKEN }}
+      # AWS secrets
       aws-key: ${{ secrets.AWSKEY }}
       aws-secret: ${{ secrets.AWSSECRET }}
       aws-dev-account: ${{ secrets.AWS_DEV_ACCOUNT }}
